@@ -24,6 +24,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'google_ads'
 ]
 
 MIDDLEWARE = [
@@ -62,8 +63,14 @@ WSGI_APPLICATION = 'app.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'campaign',
+        'USER': 'dbuser',
+        'PASSWORD': '123',
+        'HOST': 'localhost',
+        'PORT': 5432, # Стандартный порт PostgreSQL
+        'OPTIONS': {'client_encoding': 'UTF8'},
+        'TEST_CHARSET': 'utf8',
     }
 }
 
