@@ -10,7 +10,7 @@ CREDENTIALS_FILE = 'genuine-flight-417318-36aacf4a1fc2.json'  # Имя файл�
 
 # Получение данных со стороннего API
 def fetch_data_from_api(camp_id):
-    url = 'https://luck2you.ru/jl8sn.php?page=Stats&camp_id={}&group1=290&date=2{}'.format(camp_id, API_KEY)
+    url = 'https://luck2you.ru/jl8sn.php?page=Stats&camp_id={}&group1=27&group2=290&date=6&num_page=1&val_page=All{}'.format(camp_id, API_KEY)
     response = requests.get(url)
 
     if response.status_code == 200:
@@ -20,6 +20,22 @@ def fetch_data_from_api(camp_id):
             return None
         return data
     return None
+
+
+# Вычленение нужных данных из всех
+def filter_data(data, domen):
+    flag = False
+    new_data = []
+
+    for item in data:
+        if item['level'] == '1' and item['name'] == domen:
+            flag = True
+        elif item['level'] == '2' and flag:
+            new_data.append(item)
+        elif item['level'] == '1' and flag:
+            break
+
+    return new_data
 
 
 # Создание гугл-таблицы

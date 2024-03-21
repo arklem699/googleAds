@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from google_ads.utils import create_spreadsheet, update_spreadsheet_values, fetch_data_from_api
+from google_ads.utils import create_spreadsheet, update_spreadsheet_values, fetch_data_from_api, filter_data
 from google_ads.models import Campaign
 from google_ads.serializers import CampaignSerializer
 
@@ -10,13 +10,14 @@ from google_ads.serializers import CampaignSerializer
 @api_view(['GET'])
 def get_data(request):
     camp_id = request.GET.get('camp_id')
+    domen = request.GET.get('domen')
     conversion_name = request.GET.get('conversion_name')
 
     if camp_id:
         data = fetch_data_from_api(camp_id)
 
         if data is not None:
-            campaign = Campaign.objects.filter(campaign_id=camp_id).first()
+            campaign = Campaign.objects.filter(campaign_id=camp_id, domen=domen).first()
 
             if campaign:
                 return render(request, 'index.html', {'link': campaign.spreadsheet_link})
@@ -24,11 +25,14 @@ def get_data(request):
             service, spreadsheet, link = create_spreadsheet()
 
             if data != "no_clicks":
-                formatted_data = [{"name": entry['name'], "conversion_name": conversion_name} for entry in data]
+
+                new_data = filter_data(data, domen)
+                formatted_data = [{"name": item['name'], "conversion_name": conversion_name} for item in new_data]
                 update_spreadsheet_values(service, spreadsheet, formatted_data)
 
-            campaign_data = {'campaign_id': camp_id, 'spreadsheet_link': link}
+            campaign_data = {'campaign_id': camp_id, 'domen': domen, 'spreadsheet_link': link}
             serializer = CampaignSerializer(data=campaign_data)
+
             if serializer.is_valid():
                 serializer.save()
                 return render(request, 'index.html', {'link': link})

@@ -1,3 +1,5 @@
 from django.contrib import admin
+from google_ads.models import Campaign
 
-# Register your models here.
+
+admin.site.register(Campaign)
