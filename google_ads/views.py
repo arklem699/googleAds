@@ -1,4 +1,6 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
+from django.http import HttpResponseRedirect
+from django.urls import reverse
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from google_ads.utils import create_spreadsheet, update_spreadsheet_values, fetch_data_from_api, filter_data
@@ -13,6 +15,8 @@ def get_data(request):
     domen = request.GET.get('domen')
     conversion_name = request.GET.get('conversion_name')
 
+    campaigns = Campaign.objects.all()
+
     if camp_id:
         data = fetch_data_from_api(camp_id)
 
@@ -20,7 +24,7 @@ def get_data(request):
             campaign = Campaign.objects.filter(campaign_id=camp_id, domen=domen).first()
 
             if campaign:
-                return render(request, 'index.html', {'link': campaign.spreadsheet_link})
+                return render(request, 'index.html', {'link': campaign.spreadsheet_link, 'campaigns': campaigns})
 
             service, spreadsheet, link = create_spreadsheet()
 
@@ -35,8 +39,17 @@ def get_data(request):
 
             if serializer.is_valid():
                 serializer.save()
-                return render(request, 'index.html', {'link': link})
+                return render(request, 'index.html', {'link': link, 'campaigns': campaigns})
             else:
                 return Response(serializer.errors, status=400)
 
-    return render(request, 'index.html')
+    return render(request, 'index.html', {'campaigns': campaigns})
+
+
+# Удаление выбранных записей
+@api_view(['POST'])
+def delete_selected_campaigns(request):
+    ids = request.POST.getlist('ids[]')
+    ids = [int(id) for id in ids]
+    Campaign.objects.filter(id__in=ids).delete()
+    return redirect('get_data')

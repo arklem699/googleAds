@@ -15,7 +15,32 @@
         <input type="text" name="conversion_name">
         <button type="submit">Получить</button>
     </form>
+
     <h1>Ссылка на созданную таблицу:</h1>
     <a href="{{ link }}" target="_blank">{{ link }}</a>
+
+    <h1>Список кампаний:</h1>
+    <form action="{% url 'delete_selected_campaigns' %}" method="POST">
+        {% csrf_token %}
+        <table>
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>ID кампании</th>
+                    <th>Домен</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for campaign in campaigns %}
+                <tr>
+                    <td><input type="checkbox" name="ids[]" value="{{ campaign.id }}"></td>
+                    <td>{{ campaign.campaign_id }}</td>
+                    <td>{{ campaign.domen }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <button type="submit">Удалить выбранные</button>
+    </form>
 </body>
 </html>
