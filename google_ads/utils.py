@@ -71,7 +71,7 @@ def permissions(spreadsheet, httpAuth):
 def update_spreadsheet_values(service, spreadsheet, data):
 
     # Формируем данные для обновления
-    current_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    current_datetime = datetime.now().strftime("%d %b %Y").upper()
     values = [[entry['name'], entry['conversion_name'], current_datetime] for entry in data]
     data_to_update = {
         "range": "A1:C{}".format(len(values)),  
