@@ -14,11 +14,12 @@ def get_data(request):
     camp_id = request.GET.get('camp_id')
     domen = request.GET.get('domen')
     conversion_name = request.GET.get('conversion_name')
+    api_key = request.GET.get('api_key')
 
     campaigns = Campaign.objects.all()
 
     if camp_id:
-        data = fetch_data_from_api(camp_id)
+        data = fetch_data_from_api(camp_id, api_key)
 
         if data is not None:
             campaign = Campaign.objects.filter(campaign_id=camp_id, domen=domen).first()

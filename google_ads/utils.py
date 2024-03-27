@@ -3,14 +3,13 @@ import googleapiclient.discovery
 from oauth2client.service_account import ServiceAccountCredentials
 from datetime import datetime
 import requests
-from app.secret_settings import API_KEY
 
 
 CREDENTIALS_FILE = 'genuine-flight-417318-36aacf4a1fc2.json'  # Имя файла с закрытым ключом
 
 # Получение данных со стороннего API
-def fetch_data_from_api(camp_id):
-    url = 'https://luck2you.ru/jl8sn.php?page=Stats&camp_id={}&group1=27&group2=290&date=6&num_page=1&val_page=All{}'.format(camp_id, API_KEY)
+def fetch_data_from_api(camp_id, api_key):
+    url = 'https://luck2you.ru/jl8sn.php?page=Stats&camp_id={}&group1=27&group2=290&date=6&num_page=1&val_page=All{}'.format(camp_id, api_key)
     response = requests.get(url)
 
     if response.status_code == 200:
