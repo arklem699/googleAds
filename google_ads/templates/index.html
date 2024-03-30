@@ -1,27 +1,29 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
     <title>googleAds</title>
 </head>
 <body>
     <form action="{% url 'get_data' %}" method="GET">
-        <label for="camp_id">Введите camp_id:</label>
+        <label for="camp_id">Введите id кампании:</label>
         <input type="text" id="camp_id" name="camp_id">
-        <label for="domen">Введите domen:</label>
+        <label for="domen">Введите домен:</label>
         <input type="text" name="domen">
-        <label for="conversion_name">Введите Conversion Name:</label>
+        <label for="conversion_name">Введите имя конверсии:</label>
         <input type="text" name="conversion_name">
         <label for="api_key">Введите api_key:</label>
         <input type="text" name="api_key">
-        <button type="submit">Получить</button>
+        <button type="submit">Сгенерировать таблицу</button>
     </form>
 
-    <h1>Ссылка на созданную таблицу:</h1>
+
     <a href="{{ link }}" target="_blank">{{ link }}</a>
 
-    <h1>Список кампаний:</h1>
+    <label id="header">Список кампаний:</label>
     <form action="{% url 'delete_selected_campaigns' %}" method="POST">
         {% csrf_token %}
         <table>
