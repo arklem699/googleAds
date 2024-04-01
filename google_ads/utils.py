@@ -9,7 +9,7 @@ CREDENTIALS_FILE = 'genuine-flight-417318-36aacf4a1fc2.json'  # Имя файл�
 
 # Получение данных со стороннего API
 def fetch_data_from_api(camp_id, api_key):
-    url = 'https://luck2you.ru/jl8sn.php?page=Stats&camp_id={}&group1=27&group2=290&date=6&num_page=1&val_page=All{}'.format(camp_id, api_key)
+    url = 'https://luck2you.ru/jl8sn.php?page=Stats&camp_id={}&group1=27&group2=290&date=2&num_page=1&val_page=All{}'.format(camp_id, api_key)
     response = requests.get(url)
 
     if response.status_code == 200:
@@ -43,15 +43,15 @@ def create_spreadsheet():
                                                                                     'https://www.googleapis.com/auth/drive'])
     httpAuth = credentials.authorize(httplib2.Http())
     service = googleapiclient.discovery.build('sheets', 'v4', http=httpAuth)
-
+    print(service)
     spreadsheet = service.spreadsheets().create(body={
         'properties': {'title': 'gclid', 'locale': 'ru_RU'},
     }).execute()
 
     permissions(spreadsheet, httpAuth)
-    link = 'https://docs.google.com/spreadsheets/d/{}/edit'.format(spreadsheet['spreadsheetId'])
+    link = spreadsheet['spreadsheetUrl']
 
-    return service, spreadsheet, link
+    return service, link
 
 
 # Разрешение на чтение гугл-таблицы для всех
@@ -59,7 +59,7 @@ def permissions(spreadsheet, httpAuth):
     driveService = googleapiclient.discovery.build('drive', 'v3', http = httpAuth)
     shareRes = driveService.permissions().create(
         fileId = spreadsheet['spreadsheetId'],
-        body = {'type': 'anyone', 'role': 'reader'},  # Доступ на чтение кому угодно
+        body = {'type': 'anyone', 'role': 'writer'},  # Доступ на редактирование кому угодно
         fields = 'id'
     ).execute()
 
@@ -67,10 +67,10 @@ def permissions(spreadsheet, httpAuth):
 
 
 # Заполнение гугл-таблицы данными
-def update_spreadsheet_values(service, spreadsheet, data):
+def update_spreadsheet_values(service, link, data):
 
     # Формируем данные для обновления
-    current_datetime = datetime.now().strftime("%d %b %Y").upper()
+    current_datetime = datetime.now().strftime("%d %b %Y %H:%M:%S").upper()
     values = [[entry['name'], entry['conversion_name'], current_datetime] for entry in data]
     data_to_update = {
         "range": "A1:C{}".format(len(values)),  
@@ -79,7 +79,8 @@ def update_spreadsheet_values(service, spreadsheet, data):
     }
 
     # Выполняем обновление таблицы
-    results = service.spreadsheets().values().batchUpdate(spreadsheetId=spreadsheet['spreadsheetId'], body={
+    spreadsheet_id = link.split('/')[-2]
+    results = service.spreadsheets().values().batchUpdate(spreadsheetId=spreadsheet_id, body={
         "valueInputOption": "USER_ENTERED",
         "data": [data_to_update]
     }).execute()
