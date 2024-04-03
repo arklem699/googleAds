@@ -1,6 +1,4 @@
-import httplib2
-import googleapiclient.discovery
-from oauth2client.service_account import ServiceAccountCredentials
+import pygsheets
 from datetime import datetime
 import requests
 
@@ -22,12 +20,12 @@ def fetch_data_from_api(camp_id, api_key):
 
 
 # Вычленение нужных данных из всех
-def filter_data(data, domen):
+def filter_data(data, domain):
     flag = False
     new_data = []
 
     for item in data:
-        if item['level'] == '1' and item['name'] == domen:
+        if item['level'] == '1' and item['name'] == domain:
             flag = True
         elif item['level'] == '2' and flag:
             new_data.append(item)
@@ -39,50 +37,18 @@ def filter_data(data, domen):
 
 # Создание гугл-таблицы
 def create_spreadsheet():
-    credentials = ServiceAccountCredentials.from_json_keyfile_name(CREDENTIALS_FILE, ['https://www.googleapis.com/auth/spreadsheets',
-                                                                                    'https://www.googleapis.com/auth/drive'])
-    httpAuth = credentials.authorize(httplib2.Http())
-    service = googleapiclient.discovery.build('sheets', 'v4', http=httpAuth)
-    print(service)
-    spreadsheet = service.spreadsheets().create(body={
-        'properties': {'title': 'gclid', 'locale': 'ru_RU'},
-    }).execute()
-
-    permissions(spreadsheet, httpAuth)
-    link = spreadsheet['spreadsheetUrl']
-
-    return service, link
-
-
-# Разрешение на чтение гугл-таблицы для всех
-def permissions(spreadsheet, httpAuth):
-    driveService = googleapiclient.discovery.build('drive', 'v3', http = httpAuth)
-    shareRes = driveService.permissions().create(
-        fileId = spreadsheet['spreadsheetId'],
-        body = {'type': 'anyone', 'role': 'writer'},  # Доступ на редактирование кому угодно
-        fields = 'id'
-    ).execute()
-
-    return shareRes
+    gc = pygsheets.authorize(service_file=CREDENTIALS_FILE)
+    sh = gc.create('gclid')
+    sh.share('', role='reader', type='anyone')
+    return sh.url
 
 
 # Заполнение гугл-таблицы данными
-def update_spreadsheet_values(service, link, data):
-
-    # Формируем данные для обновления
-    current_datetime = datetime.now().strftime("%d %b %Y %H:%M:%S").upper()
+def update_spreadsheet_values(link, data):
+    gc = pygsheets.authorize(service_file=CREDENTIALS_FILE)
+    sh = gc.open_by_url(link)
+    ws = sh[0]
+    ws.clear()
+    current_datetime = datetime.now().strftime("%d %b %Y").upper()
     values = [[entry['name'], entry['conversion_name'], current_datetime] for entry in data]
-    data_to_update = {
-        "range": "A1:C{}".format(len(values)),  
-        "majorDimension": "ROWS",  
-        "values": values  
-    }
-
-    # Выполняем обновление таблицы
-    spreadsheet_id = link.split('/')[-2]
-    results = service.spreadsheets().values().batchUpdate(spreadsheetId=spreadsheet_id, body={
-        "valueInputOption": "USER_ENTERED",
-        "data": [data_to_update]
-    }).execute()
-
-    return results
+    ws.update_values('A1', values=values)

@@ -25,13 +25,13 @@ def get_data(request):
             if campaign:
                 return render(request, 'index.html', {'link': campaign.spreadsheet_link, 'campaigns': campaigns})
 
-            service, link = create_spreadsheet()
+            link = create_spreadsheet()
 
             if data != "no_clicks":
 
                 new_data = filter_data(data, domen)
                 formatted_data = [{"name": item['name'], "conversion_name": conversion_name} for item in new_data]
-                update_spreadsheet_values(service, link, formatted_data)
+                update_spreadsheet_values(link, formatted_data)
 
             campaign_data = {'campaign_id': camp_id, 'domen': domen, 'conversion_name': conversion_name, 'api_key': api_key, 'spreadsheet_link': link}
             serializer = CampaignSerializer(data=campaign_data)
