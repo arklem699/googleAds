@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 from app.secret_settings import *
 from celery.schedules import crontab
@@ -11,9 +12,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = bool( os.environ.get('DJANGO_DEBUG', True))
 
 ALLOWED_HOSTS = ['*']
+
+PORT = 8001
 
 
 # Application definition
@@ -26,6 +29,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'corsheaders',
     'django_celery_beat',
     'django_celery_results',
     'google_ads'
@@ -34,11 +38,20 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+]
+
+CORS_ALLOWED_ORIGINS = [
+    "http://89.223.127.88:8086"
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    "http://89.223.127.88:8086"
 ]
 
 ROOT_URLCONF = 'app.urls'
@@ -69,8 +82,8 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'campaign',
-        'USER': 'dbuser',
-        'PASSWORD': '123',
+        'USER': 'postgres',
+        'PASSWORD': '0000',
         'HOST': 'localhost',
         'PORT': 5432, # Стандартный порт PostgreSQL
         'OPTIONS': {'client_encoding': 'UTF8'},
@@ -114,6 +127,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
 STATIC_URL = '/google_ads/static/'
+
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
