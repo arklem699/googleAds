@@ -8,7 +8,7 @@
     <title>googleAds</title>
 </head>
 <body>
-    <form action="{% url 'get_data' %}" method="GET">
+    <form id="main" action="{% url 'get_data' %}" method="GET">
         <label for="camp_id">Введите id кампании:</label>
         <input type="text" id="camp_id" name="camp_id">
         <label for="domen">Введите домен:</label>
@@ -32,6 +32,7 @@
                     <th></th>
                     <th>ID кампании</th>
                     <th>Домен</th>
+                    <th>Ссылка на таблицу</th>
                 </tr>
             </thead>
             <tbody>
@@ -40,6 +41,7 @@
                     <td><input type="checkbox" name="ids[]" value="{{ campaign.id }}"></td>
                     <td>{{ campaign.campaign_id }}</td>
                     <td>{{ campaign.domen }}</td>
+                    <td><a id="table">{{ campaign.spreadsheet_link }}</a></td>
                 </tr>
                 {% endfor %}
             </tbody>

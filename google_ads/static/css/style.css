@@ -6,6 +6,9 @@ body, form, table {
 form, table {
     margin: 20px auto;
     width: 80%;
+}
+
+form#main {
     max-width: 600px;
 }
 
@@ -66,6 +69,12 @@ a {
 
 a:hover {
     text-decoration: underline;
+}
+
+a#table {
+    font-size: 18px;
+    margin-top: 0px;
+    margin-bottom: 0px;
 }
 
 #header {
