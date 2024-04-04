@@ -56,6 +56,16 @@ def update_spreadsheet_values(gc, link, data):
     sh = gc.open_by_url(link)
     ws = sh[0]
     ws.clear()
+
+    # Заголовки
+    ws.update_value('A1', 'Parameters:TimeZone=+0000')
+
+    headers = ['Google Click ID', 'Conversion Name', 'Conversion Time']
+    ws.update_values('A2', [headers])
+
+    for cell in ['A1', 'A2', 'B2', 'C2']:
+        ws.cell(cell).set_text_format('bold', True)
+
     current_datetime = datetime.now().strftime("%d %b %Y").upper()
     values = [[entry['name'], entry['conversion_name'], current_datetime] for entry in data]
-    ws.update_values('A1', values=values)
+    ws.update_values('A3', values=values)
